@@ -1,6 +1,6 @@
-module Main where
+module Main (main) where
 
-import Repl
+import SimpleRepl
 
 main :: IO ()
 main = repl id
