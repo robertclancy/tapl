@@ -1,10 +1,13 @@
-module ArithParser where
+module ArithParser (parse_term) where
 
 import Arith
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
 type AParser = Parser Term
+
+parse_term :: String -> Either ParseError Term
+parse_term = parse term ""
 
 term :: AParser
 term = atom <|> expr
