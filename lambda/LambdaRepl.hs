@@ -1,6 +1,7 @@
 module Main (main) where
 
 import LambdaParser
+import Lambda
 import LambdaPrinter
 import System.Console.Haskeline
 
@@ -12,5 +13,5 @@ main = runInputT defaultSettings loop
                  minput <- getInputLine "> "
                  case minput of
                      Nothing -> return ()
-                     Just input -> do outputStrLn $ either show render_term . parse_term $ input
+                     Just input -> do outputStrLn $ either show (render_term . evalNamedTerm) . parse_term $ input
                                       loop
