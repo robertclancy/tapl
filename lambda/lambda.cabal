@@ -22,3 +22,10 @@ executable lambda
   build-depends:       base >=4.7 && <4.8, containers >=0.5 && <0.6, parsec >=3.1 && <3.2, pretty >=1.1 && <1.2, haskeline >=0.7 && <0.8
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+test-suite spec
+  build-depends:       base >=4.7 && <4.8, containers >=0.5 && <0.6, parsec >=3.1 && <3.2, pretty >=1.1 && <1.2, haskeline >=0.7 && <0.8, hspec == 2.1.*
+  hs-source-dirs:      src, tests
+  default-language:    Haskell2010
+  main-is:             Spec.hs
+  type:                exitcode-stdio-1.0
