@@ -74,4 +74,21 @@ evalNamedTerm :: NamedTerm -> NamedTerm
 evalNamedTerm = (uncurry nameTerm) . (second eval) . unnameTerm
 
 eval :: Term -> Term
-eval = id
+eval (Var x) = Var x
+eval (Abs t) = Abs t
+eval (App (Var s) t) = App (Var s) t -- this should be a type error
+eval (App (Abs t) (App u v)) = eval $ App (Abs t) (eval $ App u v) -- will loop indefinitely on type error
+eval (App (Abs t) s) = eval $ shift (-1) $ substitute 0 (shift 1 s) t 
+eval (App (App u v) s) = eval $ App (eval $ App u v) s -- will loop indefinitely on type error
+
+substitute :: Integer -> Term -> Term -> Term
+substitute k v (Var x) = if k == x then v else Var x
+substitute k v (Abs t) = Abs $ substitute (k + 1) v t
+substitute k v (App a b) = App (substitute k v a) (substitute k v b)
+
+shift :: Integer -> Term -> Term
+shift m t = shift' m 0 t
+            where shift' :: Integer -> Integer -> Term -> Term
+                  shift' n c (Var x) = if x < c then Var x else Var $ x + n
+                  shift' n c (App s u) = App (shift' n c s) (shift' n c u)
+                  shift' n c (Abs u) = Abs (shift' n (succ c) u)
