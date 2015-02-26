@@ -1,6 +1,6 @@
-module Parser (term) where
+module SimplyTyped.Parser (term) where
 
-import Terms
+import SimplyTyped.Terms
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
