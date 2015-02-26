@@ -24,7 +24,7 @@ library
   default-language:    Haskell2010
 
 test-suite spec
-  build-depends:       base, simply-typed, hspec >= 2.0
+  build-depends:       base, simply-typed, hspec >= 2.0, parsec
   hs-source-dirs:      tests
   default-language:    Haskell2010
   main-is:             Spec.hs
