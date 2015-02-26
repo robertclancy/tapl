@@ -1,4 +1,4 @@
-module SimplyTyped.Terms where
+module Language.SimplyTyped.Syntax where
 
 data Type = TyBool | TyArr Type Type
           deriving (Show, Eq)

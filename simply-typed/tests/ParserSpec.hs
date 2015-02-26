@@ -1,7 +1,7 @@
 module ParserSpec (spec) where
 
 import Test.Hspec
-import SimplyTyped.Terms
+import Language.SimplyTyped.Syntax
 
 spec :: Spec
 spec = do
