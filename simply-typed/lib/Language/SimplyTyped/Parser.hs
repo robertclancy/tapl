@@ -14,7 +14,16 @@ readTerm = parse term ""
 
 -- Terms
 term :: Parser (Term String)
-term = whiteSpace >> app_e
+term = do whiteSpace
+          t <- term_p
+          eof
+          return t
+
+term_p :: Parser (Term String)
+term_p = abs_p <|> if_p <|> app_e
+
+atom :: Parser (Term String)
+atom = true <|> false <|> var
 
 true :: Parser (Term String)
 true = reserved "true" >> return TmTrue
@@ -31,14 +40,16 @@ abs_p = do _ <- symbol "\\"
            _ <- symbol ":"
            ty <- type_e
            _ <- symbol "."
-           b <- term
+           b <- term_p
            return $ TmAbs x ty b
 
 if_p :: Parser (Term String)
 if_p = do reserved "if"
-          b <- app_parens
-          x <- app_parens
-          y <- app_parens
+          b <- term_p
+          reserved "then"
+          x <- term_p
+          reserved "else"
+          y <- term_p
           return $ TmIf b x y
 
 -- Application Expressions
@@ -49,7 +60,7 @@ app_op :: Parser (Term String -> Term String -> Term String)
 app_op = whiteSpace >> return TmApp
 
 app_parens :: Parser (Term String)
-app_parens = abs_p <|> if_p <|> true <|> false <|> var <|> parens app_e
+app_parens = atom <|> parens (abs_p <|> if_p <|> app_e)
 
 -- Type Expressions
 type_e :: Parser Type
@@ -59,7 +70,7 @@ type_parens :: Parser Type
 type_parens = type_atom <|> parens type_e
 
 type_atom :: Parser Type
-type_atom = reserved "Bool" >> return TyBool
+type_atom = symbol "Bool" >> return TyBool
 
 type_arr :: Parser (Type -> Type -> Type)
 type_arr = reservedOp "->" >> return TyArr
@@ -68,7 +79,7 @@ type_arr = reservedOp "->" >> return TyArr
 
 language :: P.LanguageDef st
 language = emptyDef {
-                    P.reservedNames = ["true", "false", "if", "Bool"],
+                    P.reservedNames = ["true", "false", "if", "then", "else"],
                     P.reservedOpNames = ["->"]
 }
 

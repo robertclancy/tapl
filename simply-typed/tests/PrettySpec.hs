@@ -44,8 +44,9 @@ instance Arbitrary (Term String) where
         shrink (TmIf x y z) = [x, y, z] ++ [TmIf x' y' z' | (x', y', z') <- shrink (x, y, z)]
 
 arbitraryIdentifier :: Gen String
-arbitraryIdentifier = listOf1 alpha where
+arbitraryIdentifier = suchThat (listOf1 alpha) isNotReserved where
     alpha = choose ('a', 'z')
+    isNotReserved x = notElem x ["if", "then", "else", "true", "false"]
 
 spec :: Spec
 spec = do
