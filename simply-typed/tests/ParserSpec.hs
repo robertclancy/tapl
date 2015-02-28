@@ -30,6 +30,9 @@ spec = do
                 parseTerm "$" `shouldSatisfy` isLeft
             it "should not parse identifiers that start with numbers" $ do
                 parseTerm "3some" `shouldSatisfy` isLeft
+            it "should parse identifiers that start with reserved words" $ do
+                parseTerm "truely" `shouldBe` Right (TmVar "truely")
+                parseTerm "if_statement" `shouldBe` Right (TmVar "if_statement")
         describe "if statements" $ do
             it "should parse basic if" $ do
                 parseTerm "if true true false" `shouldBe` Right (TmIf TmTrue TmTrue TmFalse)
