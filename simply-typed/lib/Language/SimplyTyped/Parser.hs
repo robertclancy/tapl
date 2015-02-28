@@ -1,10 +1,14 @@
-module Language.SimplyTyped.Parser (term) where
+module Language.SimplyTyped.Parser (term, readTerm) where
 
 import Language.SimplyTyped.Syntax
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)
+
+-- Standard parser
+readTerm :: String -> Either ParseError (Term String)
+readTerm = parse term ""
 
 -- The Parser
 
@@ -77,8 +81,6 @@ reserved :: String -> Parser ()
 reserved   = P.reserved lexer
 symbol :: String -> Parser String
 symbol     = P.symbol lexer
-operator :: Parser String
-operator   = P.operator lexer
 reservedOp :: String -> Parser ()
 reservedOp = P.reservedOp lexer
 whiteSpace :: Parser ()
