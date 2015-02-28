@@ -35,13 +35,14 @@ spec = do
                 parseTerm "if_statement" `shouldBe` Right (TmVar "if_statement")
         describe "if statements" $ do
             it "should parse basic if" $ do
-                parseTerm "if true true false" `shouldBe` Right (TmIf TmTrue TmTrue TmFalse)
+                parseTerm "if true then true else false" `shouldBe` Right (TmIf TmTrue TmTrue TmFalse)
             it "should parse nested ifs" $ do
-                parseTerm "if if if false true false true false true false" `shouldBe` Right (TmIf (TmIf (TmIf TmFalse TmTrue TmFalse) TmTrue TmFalse) TmTrue TmFalse)
+                parseTerm "if if if false then true else false then true else false then true else false" `shouldBe` Right (TmIf (TmIf (TmIf TmFalse TmTrue TmFalse) TmTrue TmFalse) TmTrue TmFalse)
             it "should fail with incomplete if statement" $ do
-                parseTerm "if true false" `shouldSatisfy` isLeft
+                parseTerm "if true then false" `shouldSatisfy` isLeft
             it "should handle abstractions in branches" $ do
-                parseTerm "if (\\x : Bool. y) x y" `shouldBe` Right (TmIf (TmAbs "x" TyBool (TmVar "y")) (TmVar "x") (TmVar "y"))
+                parseTerm "if (\\x : Bool. y) then x else y" `shouldBe` Right (TmIf (TmAbs "x" TyBool (TmVar "y")) (TmVar "x") (TmVar "y"))
+                parseTerm "if true then \\x : Bool. if x then true else false else \\y:Bool. y" `shouldBe` Right (TmIf TmTrue (TmAbs "x" TyBool (TmIf (TmVar "x") TmTrue TmFalse)) (TmAbs "y" TyBool (TmVar "y")))
         describe "abstractions" $ do
             it "should parse abstraction" $ do
                 parseTerm "\\x : Bool. x" `shouldBe` Right (TmAbs "x" TyBool (TmVar "x"))
@@ -75,4 +76,4 @@ spec = do
             it "should allow parens to associate to the right" $ do
                 parseTerm "true (true (true false))" `shouldBe` Right (TmApp TmTrue (TmApp TmTrue (TmApp TmTrue TmFalse)))
             it "should parse applications of if statements" $ do
-                parseTerm "if x y z if a b c" `shouldBe` Right (TmApp (TmIf (TmVar "x") (TmVar "y") (TmVar "z")) (TmIf (TmVar "a") (TmVar "b") (TmVar "c")))
+                parseTerm "if x then y else z if a then b else c" `shouldBe` Right (TmApp (TmIf (TmVar "x") (TmVar "y") (TmVar "z")) (TmIf (TmVar "a") (TmVar "b") (TmVar "c")))
