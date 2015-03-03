@@ -1,4 +1,4 @@
-module Language.SimplyTyped.Semantics where
+module Language.SimplyTyped.Semantics (unname, name, alphaEquiv) where
 
 import Language.SimplyTyped.Syntax
 import Data.List (elemIndex, genericIndex)
