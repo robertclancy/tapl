@@ -6,35 +6,37 @@ import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)
 
+type PTerm = Term String String
+
 -- Standard parser
-readTerm :: String -> Either ParseError (Term String)
+readTerm :: String -> Either ParseError PTerm
 readTerm = parse term ""
 
 -- The Parser
 
 -- Terms
-term :: Parser (Term String)
+term :: Parser PTerm
 term = do whiteSpace
           t <- term_p
           eof
           return t
 
-term_p :: Parser (Term String)
+term_p :: Parser PTerm
 term_p = abs_p <|> if_p <|> app_e
 
-atom :: Parser (Term String)
+atom :: Parser PTerm
 atom = true <|> false <|> var
 
-true :: Parser (Term String)
+true :: Parser PTerm
 true = reserved "true" >> return TmTrue
 
-false :: Parser (Term String)
+false :: Parser PTerm
 false = reserved "false" >> return TmFalse
 
-var :: Parser (Term String)
+var :: Parser PTerm
 var = fmap TmVar identifier
 
-abs_p :: Parser (Term String)
+abs_p :: Parser PTerm
 abs_p = do _ <- symbol "\\"
            x <- identifier
            _ <- symbol ":"
@@ -43,7 +45,7 @@ abs_p = do _ <- symbol "\\"
            b <- term_p
            return $ TmAbs x ty b
 
-if_p :: Parser (Term String)
+if_p :: Parser PTerm
 if_p = do reserved "if"
           b <- term_p
           reserved "then"
@@ -53,13 +55,13 @@ if_p = do reserved "if"
           return $ TmIf b x y
 
 -- Application Expressions
-app_e :: Parser (Term String)
+app_e :: Parser PTerm
 app_e = chainl1 app_parens app_op
 
-app_op :: Parser (Term String -> Term String -> Term String)
+app_op :: Parser (PTerm -> PTerm -> PTerm)
 app_op = whiteSpace >> return TmApp
 
-app_parens :: Parser (Term String)
+app_parens :: Parser PTerm
 app_parens = atom <|> parens (abs_p <|> if_p <|> app_e)
 
 -- Type Expressions

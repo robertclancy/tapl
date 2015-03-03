@@ -24,10 +24,11 @@ executable styped
 library
   exposed-modules:     Language.SimplyTyped.Syntax,
                        Language.SimplyTyped.Parser,
-                       Language.SimplyTyped.Pretty
+                       Language.SimplyTyped.Pretty,
+                       Language.SimplyTyped.Semantics
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8, parsec >=3.1 && <3.2, pretty
+  build-depends:       base >=4.7 && <5.0, parsec >=3.1 && <3.2, pretty
   hs-source-dirs:      lib
   default-language:    Haskell2010
   other-extensions:    DeriveFunctor

@@ -3,6 +3,6 @@ module Language.SimplyTyped.Syntax where
 
 data Type = TyBool | TyArr Type Type
           deriving (Show, Eq)
-data Term a = TmVar a | TmAbs a Type (Term a) | TmApp (Term a) (Term a) |
-              TmTrue | TmFalse | TmIf (Term a) (Term a) (Term a)
+data Term v s = TmVar v | TmAbs s Type (Term v s) | TmApp (Term v s) (Term v s) |
+              TmTrue | TmFalse | TmIf (Term v s) (Term v s) (Term v s)
               deriving (Show, Eq, Functor)

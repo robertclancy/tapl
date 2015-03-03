@@ -6,7 +6,9 @@ import Language.SimplyTyped.Parser
 import Text.Parsec
 import Text.Parsec.Error
 
-parseTerm :: String -> Either ParseError (Term String)
+type PTerm = Term String String
+
+parseTerm :: String -> Either ParseError PTerm
 parseTerm = parse term ""
 
 -- equality instance needed for equality checking on right argument

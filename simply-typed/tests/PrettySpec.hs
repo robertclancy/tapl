@@ -10,6 +10,8 @@ import Language.SimplyTyped.Parser
 import Language.SimplyTyped.Pretty
 import Text.PrettyPrint (render)
 
+type PTerm = Term String String
+
 instance Arbitrary Type where
         arbitrary = sized ty where
             ty 0 = return TyBool
@@ -18,7 +20,7 @@ instance Arbitrary Type where
         shrink TyBool = []
         shrink (TyArr x y) = [x, y] ++ [TyArr x' y' | (x', y') <- shrink (x, y)]
 
-instance Arbitrary (Term String) where
+instance Arbitrary PTerm where
         arbitrary = sized aTerm where
             aTerm 0 = oneof [
                             liftM TmVar arbitraryIdentifier,
