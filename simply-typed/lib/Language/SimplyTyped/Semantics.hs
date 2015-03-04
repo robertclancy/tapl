@@ -5,6 +5,9 @@ import Data.List (elemIndex, genericIndex)
 
 data SemanticError = SemanticError String
 
+instance Show SemanticError where
+        show (SemanticError x) = x
+
 scoped :: (v -> [s] -> Either SemanticError a) -> Term v s -> Either SemanticError (Term a s)
 scoped changeVariable term = scoped' term [] where
     scoped' (TmVar x) ctx      = fmap TmVar $ changeVariable x ctx
@@ -23,12 +26,17 @@ scoped changeVariable term = scoped' term [] where
         f' <- scoped' f ctx
         return $ TmIf b' t' f'
 
-unname :: (Eq s) => Term s s -> Either SemanticError (Term Integer s)
+unname :: Term String String -> Either SemanticError (Term Integer String)
 unname = scoped indexOfVar where
     indexOfVar x ctx = case elemIndex x ctx of
                            Just index -> Right $ toInteger index
-                           Nothing -> Left (SemanticError $ "undefined variable")
+                           Nothing -> Left (SemanticError $ "undefined variable " ++ x)
 
+-- this works, I think for closed terms, which is all we allow since
+-- capture occurs when a term with a free variable is substituted into
+-- another. Since we use call by value, we never evaluate under an
+-- abstraction. This means that all terms that are substituted as arguments
+-- are closed.
 name :: (Eq s) => Term Integer s -> Either SemanticError (Term s s)
 name = scoped nameVar where
     nameVar x ctx = Right $ genericIndex ctx x
@@ -36,7 +44,7 @@ name = scoped nameVar where
 eraseName :: Term v s -> Term v ()
 eraseName = fmap (\_ -> ())
 
-alphaEquiv :: (Eq s) => Term s s -> Term s s -> Either SemanticError Bool
+alphaEquiv :: Term String String -> Term String String -> Either SemanticError Bool
 alphaEquiv x y = do
         x' <- unname x
         y' <- unname y
@@ -44,7 +52,7 @@ alphaEquiv x y = do
 
 typeof :: Term Integer s -> Either SemanticError Type
 typeof = typeof' [] where
-    typeof' :: [s] -> Term Integer s -> Either SemanticError Type
+    typeof' :: [Type] -> Term Integer s -> Either SemanticError Type
     typeof' _ TmTrue = Right TyBool
     typeof' _ TmFalse = Right TyBool
     typeof' s (TmIf b t f) = do
