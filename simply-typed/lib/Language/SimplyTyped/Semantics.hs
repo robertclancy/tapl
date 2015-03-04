@@ -1,4 +1,4 @@
-module Language.SimplyTyped.Semantics (unname, name, alphaEquiv) where
+module Language.SimplyTyped.Semantics (unname, name, alphaEquiv, typeof) where
 
 import Language.SimplyTyped.Syntax
 import Data.List (elemIndex, genericIndex)
@@ -41,3 +41,28 @@ alphaEquiv x y = do
         x' <- unname x
         y' <- unname y
         return $ (eraseName x') == (eraseName y')
+
+typeof :: Term Integer s -> Either SemanticError Type
+typeof = typeof' [] where
+    typeof' :: [s] -> Term Integer s -> Either SemanticError Type
+    typeof' _ TmTrue = Right TyBool
+    typeof' _ TmFalse = Right TyBool
+    typeof' s (TmIf b t f) = do
+        tb <- typeof' s b
+        tt <- typeof' s t
+        tf <- typeof' s f
+        checkType tb TyBool
+        checkType tt tf
+        return tt
+    typeof' s (TmAbs a ty b) = do
+        tb <- typeof' (ty : s) b
+        return $ TyArr ty tb
+    typeof' s (TmApp f a) = do
+        tf <- typeof' s f
+        ta <- typeof' s a
+        case tf of
+            TyArr tfa tb -> checkType tfa ta >> return tb
+    typeof' s (TmVar v) = Right $ genericIndex s v
+
+    checkType :: Type -> Type -> Either SemanticError ()
+    checkType x y = if x == y then Right () else Left $ SemanticError $ "expected type " ++ show x ++ " to equal " ++ show y
