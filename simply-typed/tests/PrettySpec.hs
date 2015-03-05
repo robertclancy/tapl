@@ -29,9 +29,12 @@ instance Arbitrary PTerm where
                             ]
             aTerm n = oneof [
                             (liftM3 TmAbs) arbitraryIdentifier arbitrary (aTerm $ pred n),
+                            letTerm,
                             ifTerm,
                             appTerm
                             ] where
+                                letTerm = do s <- choose (0, pred n)
+                                             (liftM3 TmLet) arbitraryIdentifier (aTerm s) (aTerm $ n - s - 1)
                                 ifTerm = do a <- choose (0, pred n)
                                             b <- choose (0, pred n)
                                             c <- choose (0, pred n)
@@ -41,14 +44,15 @@ instance Arbitrary PTerm where
         shrink TmTrue = []
         shrink TmFalse = []
         shrink (TmVar _) = []
-        shrink (TmAbs _ _ x) = [x] ++ shrink x
+        shrink (TmAbs _ _ x) = [x]
+        shrink (TmLet s v b) = [v, b] ++ [TmLet s v' b' | (v', b') <- shrink (v, b)]
         shrink (TmApp x y) = [x, y] ++ [TmApp x' y' | (x', y') <- shrink (x, y)]
         shrink (TmIf x y z) = [x, y, z] ++ [TmIf x' y' z' | (x', y', z') <- shrink (x, y, z)]
 
 arbitraryIdentifier :: Gen String
 arbitraryIdentifier = suchThat (listOf1 alpha) isNotReserved where
     alpha = choose ('a', 'z')
-    isNotReserved x = notElem x ["if", "then", "else", "true", "false"]
+    isNotReserved x = notElem x ["if", "then", "else", "true", "false", "let", "in"]
 
 spec :: Spec
 spec = do

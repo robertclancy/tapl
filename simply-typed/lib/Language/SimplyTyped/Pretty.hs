@@ -12,11 +12,13 @@ prettyTerm (TmIf x y z) = text "if" <+> prettyTerm x <+> text "then" <+> prettyT
 prettyTerm (TmVar x) = text x
 prettyTerm (TmAbs x t b) = text "\\" <> text x <+> text ":" <+> prettyType t <> text "." <+> prettyTerm b
 prettyTerm (TmApp x y) = prettyTermParens x <+> prettyTermParens y
+prettyTerm (TmLet x v b) = text "let" <+> text x <+> text "=" <+> prettyTerm v <+> text "in" <+> prettyTerm b
 
 prettyTermParens :: PTerm -> Doc
 prettyTermParens x@(TmApp _ _)   = parens $ prettyTerm x
 prettyTermParens x@(TmAbs _ _ _) = parens $ prettyTerm x
 prettyTermParens x@(TmIf _ _ _)  = parens $ prettyTerm x
+prettyTermParens x@(TmLet _ _ _) = parens $ prettyTerm x
 prettyTermParens x               = prettyTerm x
 
 prettyType :: Type -> Doc

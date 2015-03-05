@@ -8,6 +8,7 @@ eval TmFalse                  = TmFalse
 eval (TmIf TmTrue t f)        = eval t
 eval (TmIf TmFalse t f)       = eval f
 eval (TmIf b t f)             = eval $ TmIf (eval b) t f
+eval (TmLet s v b)            = eval $ shift (-1) $ substitute (eval v) b
 eval (TmVar x)                = TmVar x
 eval (TmAbs a ty b)           = TmAbs a ty b
 eval (TmApp (TmAbs a ty b) s) = eval $ shift (-1) $ substitute (shift 1 (eval s)) b
@@ -22,6 +23,7 @@ substitute v x = substitute' 0 v x where
     substitute' k v (TmVar x) = if k == x then v else TmVar x
     substitute' k v (TmAbs t ty b) = TmAbs t ty $ substitute' (k + 1) (shift 1 v) b
     substitute' k v (TmApp a b) = TmApp (substitute' k v a) (substitute' k v b)
+    substitute' k v (TmLet s a b) = TmLet s (substitute' k v a) (substitute' (k + 1) (shift 1 v) b)
 
 shift :: Integer -> Term Integer s -> Term Integer s
 shift m t = shift' m 0 t where
@@ -32,3 +34,4 @@ shift m t = shift' m 0 t where
     shift' n c (TmVar x) = if x < c then TmVar x else TmVar $ x + n
     shift' n c (TmApp s u) = TmApp (shift' n c s) (shift' n c u)
     shift' n c (TmAbs v ty b) = TmAbs v ty (shift' n (succ c) b)
+    shift' n c (TmLet s a b) = TmLet s (shift' n c a) (shift' n (succ c) b)

@@ -14,6 +14,10 @@ scoped changeVariable term = scoped' term [] where
     scoped' (TmAbs s ty b) ctx = do
         b' <- scoped' b $ s : ctx
         return $ TmAbs s ty b'
+    scoped' (TmLet s v b) ctx = do
+        v' <- scoped' v ctx
+        b' <- scoped' b $ s : ctx
+        return $ TmLet s v' b'
     scoped' (TmApp f a) ctx    = do
         f' <- scoped' f ctx
         a' <- scoped' a ctx
@@ -62,6 +66,9 @@ typeof = typeof' [] where
         checkType tb TyBool
         checkType tt tf
         return tt
+    typeof' s (TmLet a v b) = do
+        vt <- typeof' s v
+        typeof' (vt : s) b
     typeof' s (TmAbs a ty b) = do
         tb <- typeof' (ty : s) b
         return $ TyArr ty tb
@@ -70,6 +77,7 @@ typeof = typeof' [] where
         ta <- typeof' s a
         case tf of
             TyArr tfa tb -> checkType tfa ta >> return tb
+            _            -> Left $ SemanticError "applied non-function type"
     typeof' s (TmVar v) = Right $ genericIndex s v
 
     checkType :: Type -> Type -> Either SemanticError ()

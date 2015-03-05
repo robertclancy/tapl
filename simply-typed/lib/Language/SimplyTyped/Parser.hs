@@ -22,7 +22,7 @@ term = do whiteSpace
           return t
 
 term_p :: Parser PTerm
-term_p = abs_p <|> if_p <|> app_e
+term_p = let_p <|> abs_p <|> if_p <|> app_e
 
 atom :: Parser PTerm
 atom = true <|> false <|> var
@@ -35,6 +35,15 @@ false = reserved "false" >> return TmFalse
 
 var :: Parser PTerm
 var = fmap TmVar identifier
+
+let_p :: Parser PTerm
+let_p = do reserved "let"
+           x <- identifier
+           reservedOp "="
+           val <- term_p
+           reserved "in"
+           body <- term_p
+           return $ TmLet x val body
 
 abs_p :: Parser PTerm
 abs_p = do _ <- symbol "\\"
@@ -62,7 +71,7 @@ app_op :: Parser (PTerm -> PTerm -> PTerm)
 app_op = whiteSpace >> return TmApp
 
 app_parens :: Parser PTerm
-app_parens = atom <|> parens (abs_p <|> if_p <|> app_e)
+app_parens = atom <|> parens (let_p <|> abs_p <|> if_p <|> app_e)
 
 -- Type Expressions
 type_e :: Parser Type
@@ -81,8 +90,8 @@ type_arr = reservedOp "->" >> return TyArr
 
 language :: P.LanguageDef st
 language = emptyDef {
-                    P.reservedNames = ["true", "false", "if", "then", "else"],
-                    P.reservedOpNames = ["->"]
+                    P.reservedNames = ["true", "false", "if", "then", "else", "let", "in"],
+                    P.reservedOpNames = ["->", "="]
 }
 
 lexer      = P.makeTokenParser language

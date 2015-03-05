@@ -66,6 +66,13 @@ spec = do
                 parseTerm "\\z: Bool. x" `shouldBe` Right (TmAbs "z" TyBool (TmVar "x"))
             it "should error if abstraction has no type" $ do
                 parseTerm "\\x. x" `shouldSatisfy` isLeft
+        describe "let" $ do
+            it "should parse let expression" $ do
+                parseTerm "let x = true in x" `shouldBe` Right (TmLet "x" TmTrue (TmVar "x"))
+            it "should parse as far to the right as possible" $ do
+                parseTerm "let x = true in x y" `shouldBe` Right (TmLet "x" TmTrue (TmApp (TmVar "x") (TmVar "y")))
+            it "should handle nested lets" $ do
+                parseTerm "let x = let y = true in y z in x" `shouldBe` Right (TmLet "x" (TmLet "y" TmTrue (TmApp (TmVar "y") (TmVar "z"))) (TmVar "x"))
         describe "type declarations" $ do
             it "should parse type declarations right associatively" $ do
                 parseTerm "\\x : (Bool -> Bool -> Bool). x" `shouldBe` Right (TmAbs "x" (TyArr TyBool (TyArr TyBool TyBool)) (TmVar "x"))
