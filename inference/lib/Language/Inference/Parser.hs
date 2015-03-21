@@ -15,15 +15,12 @@ readTerm = parse term ""
 -- Terms
 term :: Parser Term
 term = do whiteSpace
-          t <- exp_p
+          t <- term_p
           eof
           return t
 
-exp_p :: Parser Term
-exp_p = parens_term_p <|> app_e
-
-parens_term_p :: Parser Term
-parens_term_p = abs_p <|> succ_p <|> rec_p <|> if_p
+term_p :: Parser Term
+term_p = abs_p <|> succ_p <|> rec_p <|> if_p <|> app_e
 
 atom :: Parser Term
 atom = bool <|> zero <|> var
@@ -47,16 +44,16 @@ abs_p :: Parser Term
 abs_p = do _ <- symbol "\\"
            x <- identifier
            _ <- symbol "."
-           b <- exp_p
+           b <- term_p
            return $ TmAbs x b
 
 if_p :: Parser Term
 if_p = do reserved "if"
-          b <- exp_p
+          b <- term_p
           reserved "then"
-          x <- exp_p
+          x <- term_p
           reserved "else"
-          y <- exp_p 
+          y <- term_p
           return $ TmIf b x y
 
 -- Application Expressions
@@ -67,7 +64,7 @@ app_op :: Parser (Term -> Term -> Term)
 app_op = whiteSpace >> return TmApp
 
 app_parens :: Parser Term
-app_parens = atom <|> parens (parens_term_p)
+app_parens = atom <|> parens (term_p)
 
 -- Expressions that could be parsed as function calls
 succ_p :: Parser Term
