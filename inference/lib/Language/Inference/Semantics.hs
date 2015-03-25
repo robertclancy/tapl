@@ -2,6 +2,7 @@
 module Language.Inference.Semantics where
 -- Reference: Generalizing Hindley-Milner Type Inference Algorithms (2002)
 
+import Language.Inference.Syntax
 import Data.Foldable (foldrM)
 import Data.Maybe
 import Data.Monoid
@@ -90,3 +91,7 @@ unify (TyArr a b) (TyArr x y) = do
         t <- unify b y
         return $ s <> t
 unify x@_ y@_ = Left $ UnificationFailure x y
+
+-- Algorithm W
+infer :: Term -> Either SemanticError TyMono
+infer _ = Right TyBool
