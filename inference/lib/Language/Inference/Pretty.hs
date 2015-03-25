@@ -1,7 +1,17 @@
-module Language.Inference.Pretty (prettyTerm, showTerm) where
+module Language.Inference.Pretty (prettyTermType, showTermType, prettyTerm, showTerm) where
 
+import Language.Inference.Semantics
 import Language.Inference.Syntax
 import Text.PrettyPrint
+
+prettyType :: TyMono -> Doc
+prettyType TyBool = text "Bool"
+prettyType TyNat  = text "Nat"
+prettyType (TyVar var) = text "X" <> text (show var)
+prettyType (TyArr x y) = prettyTypeParens x <+> text "->" <+> prettyType y where
+    prettyTypeParens :: TyMono -> Doc
+    prettyTypeParens x@(TyArr _ _) = parens $ prettyType x
+    prettyTypeParens x             = prettyType x
 
 prettyTerm :: Term -> Doc
 prettyTerm TmTrue = text "true"
@@ -22,5 +32,14 @@ prettyTermParens x@(TmSucc _)   = parens $ prettyTerm x
 prettyTermParens x@(TmRec _ _)  = parens $ prettyTerm x
 prettyTermParens x              = prettyTerm x
 
+prettyTermType :: Term -> TyMono -> Doc
+prettyTermType term ty = prettyTerm term <+> text ":" <+> prettyType ty
+
 showTerm :: Term -> String
 showTerm = render . prettyTerm
+
+showType :: TyMono -> String
+showType = render . prettyType
+
+showTermType :: Term -> TyMono -> String
+showTermType tm ty = render $ prettyTermType tm ty
