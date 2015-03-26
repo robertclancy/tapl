@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeSynonymInstances #-}
 module Arbitrary where
 
 import Test.QuickCheck

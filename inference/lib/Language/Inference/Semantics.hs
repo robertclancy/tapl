@@ -87,6 +87,9 @@ unify TyNat  TyNat  = Right mempty
 unify (TyVar x) (TyVar y) | x == y = Right mempty
 unify (TyVar var) x | Set.notMember var (freeVarsMono x) = Right $ singleton var x
 unify x (TyVar var) | Set.notMember var (freeVarsMono x) = Right $ singleton var x
+-- THIS IS INCORRECT: it fails to unify X -> X, NAT -> Y to X -> NAT, Y ->
+-- NAT
+-- TODO: write tests for unify
 unify (TyArr a b) (TyArr x y) = do
         s <- unify a x
         t <- unify b y
