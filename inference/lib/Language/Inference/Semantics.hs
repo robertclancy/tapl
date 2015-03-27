@@ -94,13 +94,10 @@ unify TyNat  TyNat  = Right mempty
 unify (TyVar x) (TyVar y) | x == y = Right mempty
 unify (TyVar var) x | Set.notMember var (freeVarsMono x) = Right $ singleton var x
 unify x (TyVar var) | Set.notMember var (freeVarsMono x) = Right $ singleton var x
--- THIS IS INCORRECT: it fails to unify X -> X, NAT -> Y to X -> NAT, Y ->
--- NAT
--- TODO: write tests for unify
 unify (TyArr a b) (TyArr x y) = do
         s <- unify a x
-        t <- unify b y
-        return $ s <> t
+        t <- unify (substitute s b) (substitute s y)
+        return $ t <> s
 unify x@_ y@_ = Left $ UnificationFailure x y
 
 -- Algorithm W
@@ -134,9 +131,9 @@ inferWithState context (TmIf b t f) = do
         (s1, t1) <- inferWithState context b
         s2 <- lift $ unify t1 TyBool
         (s3, t3) <- inferWithState (substituteCtx (s2 <> s1) context) t
-        (s4, t4) <- inferWithState (substituteCtx (s2 <> s1) context) f
-        s5 <- lift $ unify t3 t4
-        return (s5 <> s4 <> s3 <> s2 <> s1, t3)
+        (s4, t4) <- inferWithState (substituteCtx (s3 <> s2 <> s1) context) f
+        s5 <- lift $ unify (substitute s4 t3) t4
+        return (s5 <> s4 <> s3 <> s2 <> s1, (substitute s5 t4))
 inferWithState context (TmSucc n) = do
         (s1, t1) <- inferWithState context n
         s2 <- lift $ unify t1 TyNat
@@ -144,5 +141,5 @@ inferWithState context (TmSucc n) = do
 inferWithState context (TmRec base ind) = do
         (s1, t1) <- inferWithState context base
         (s2, t2) <- inferWithState (substituteCtx s1 context) ind
-        s3 <- lift $ unify t2 (TyArr TyNat (TyArr t1 t1))
-        return (s3 <> s2 <> s1, TyArr TyNat t1)
+        s3 <- lift $ unify t2 (TyArr TyNat (TyArr (substitute s2 t1) (substitute s2 t1)))
+        return (s3 <> s2 <> s1, TyArr TyNat (substitute (s3 <> s2) t1))
