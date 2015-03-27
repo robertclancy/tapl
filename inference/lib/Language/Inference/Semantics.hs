@@ -14,6 +14,7 @@ data TyMono = TyBool |
             TyNat |
             TyArr TyMono TyMono |
             TyVar Integer
+            deriving (Eq, Show)
 
 data TyPoly = TyPoly (Set.Set Integer) TyMono
 
@@ -21,6 +22,12 @@ type Context = Map.Map String TyPoly
 
 data SemanticError = UndefinedVariable String |
                    UnificationFailure TyMono TyMono
+                   deriving (Eq)
+
+instance Show SemanticError where
+        show (UndefinedVariable var) = "undefined variable: " ++ var
+        show (UnificationFailure x y) = "cannot unify: " ++ (show x) ++ " and " ++ (show y)
+
 
 fresh :: (Monad m) => StateT Integer m Integer
 fresh = modify (+1) >> get

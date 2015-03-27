@@ -39,4 +39,4 @@ test-suite spec
   default-language:    Haskell2010
   main-is:             Spec.hs
   type:                exitcode-stdio-1.0
-  other-extensions:    TypeSynonymInstances
+  other-extensions:    TypeSynonymInstances, FlexibleInstances

@@ -4,10 +4,6 @@ import Language.Inference.Semantics
 import Language.Inference.Syntax
 import Text.PrettyPrint
 
-instance Show SemanticError where
-        show (UndefinedVariable var) = "undefined variable: " ++ var
-        show (UnificationFailure x y) = "cannot unify: " ++ (showType x) ++ " and " ++ (showType y)
-
 prettyType :: TyMono -> Doc
 prettyType TyBool = text "Bool"
 prettyType TyNat  = text "Nat"
