@@ -23,10 +23,10 @@ scoped changeVariable term = scoped' term [] where
     scoped' (TmAbs s b) ctx = do
         b' <- scoped' b $ s : ctx
         return $ TmAbs s b'
-    -- scoped' (TmLet s v b) ctx = do
-    --    v' <- scoped' v ctx
-    --    b' <- scoped' b $ s : ctx
-    --    return $ TmLet s v' b'
+    scoped' (TmLet s v b) ctx = do
+        v' <- scoped' v ctx
+        b' <- scoped' b $ s : ctx
+        return $ TmLet s v' b'
     scoped' (TmApp f a) ctx    = do
         f' <- scoped' f ctx
         a' <- scoped' a ctx
@@ -66,7 +66,7 @@ eval (TmIf TmFalse t f)             = eval f
 eval (TmIf b t f)                   = eval $ TmIf (eval b) t f
 eval TmZero                         = TmZero
 eval (TmSucc n)                     = TmSucc $ eval n
--- eval (TmLet s v b)            = eval $ shift (-1) $ substitute (eval v) b
+eval (TmLet s v b)                  = eval $ shift (-1) $ substitute (shift 1 (eval v)) b
 eval (TmVar x)                      = TmVar x
 eval (TmAbs a b)                    = TmAbs a b
 eval (TmApp (TmAbs a b) s)          = eval $ shift (-1) $ substitute (shift 1 (eval s)) b
@@ -87,7 +87,7 @@ substitute v x = substitute' 0 v x where
     substitute' k v (TmVar x) = if k == x then v else TmVar x
     substitute' k v (TmAbs t b) = TmAbs t $ substitute' (k + 1) (shift 1 v) b
     substitute' k v (TmApp a b) = TmApp (substitute' k v a) (substitute' k v b)
-    -- substitute' k v (TmLet s a b) = TmLet s (substitute' k v a) (substitute' (k + 1) (shift 1 v) b)
+    substitute' k v (TmLet s a b) = TmLet s (substitute' k v a) (substitute' (k + 1) (shift 1 v) b)
 
 shift :: Integer -> UTerm -> UTerm
 shift m t = shift' m 0 t where
@@ -101,4 +101,4 @@ shift m t = shift' m 0 t where
     shift' n c (TmVar x) = if x < c then TmVar x else TmVar $ x + n
     shift' n c (TmApp s u) = TmApp (shift' n c s) (shift' n c u)
     shift' n c (TmAbs v b) = TmAbs v (shift' n (succ c) b)
-    -- shift' n c (TmLet s a b) = TmLet s (shift' n c a) (shift' n (succ c) b)
+    shift' n c (TmLet s a b) = TmLet s (shift' n c a) (shift' n (succ c) b)

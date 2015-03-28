@@ -20,7 +20,7 @@ term = do whiteSpace
           return t
 
 term_p :: Parser Term
-term_p = abs_p <|> succ_p <|> rec_p <|> if_p <|> app_e
+term_p = let_p <|> abs_p <|> succ_p <|> rec_p <|> if_p <|> app_e
 
 atom :: Parser Term
 atom = bool <|> zero <|> var
@@ -56,6 +56,15 @@ if_p = do reserved "if"
           y <- term_p
           return $ TmIf b x y
 
+let_p :: Parser Term
+let_p = do reserved "let"
+           x <- identifier
+           reservedOp "="
+           val <- term_p
+           reserved "in"
+           body <- term_p
+           return $ TmLet x val body
+
 -- Application Expressions
 app_e :: Parser Term
 app_e = chainl1 app_parens app_op
@@ -82,7 +91,7 @@ rec_p = do reserved "rec"
 
 language :: P.LanguageDef st
 language = emptyDef {
-                    P.reservedNames = ["true", "false", "if", "then", "else", "let", "in", "succ", "rec", "0"],
+                    P.reservedNames = ["true", "false", "if", "then", "else", "let", "in", "succ", "rec", "0", "let", "in"],
                     P.reservedOpNames = ["->", "="]
 }
 

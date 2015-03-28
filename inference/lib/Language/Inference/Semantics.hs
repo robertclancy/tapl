@@ -143,3 +143,9 @@ inferWithState context (TmRec base ind) = do
         (s2, t2) <- inferWithState (substituteCtx s1 context) ind
         s3 <- lift $ unify t2 (TyArr TyNat (TyArr (substitute s2 t1) (substitute s2 t1)))
         return (s3 <> s2 <> s1, TyArr TyNat (substitute (s3 <> s2) t1))
+inferWithState context (TmLet var arg body) = do
+        (s1, t1) <- inferWithState context arg
+        let newContext = substituteCtx s1 context
+        let genContext = Map.insert var (generalize newContext t1) newContext
+        (s2, t2) <- inferWithState genContext body
+        return (s2 <> s1, t2)

@@ -19,8 +19,11 @@ instance Arbitrary Term where
                             (liftM TmSucc) (aTerm $ pred n),
                             recTerm,
                             ifTerm,
+                            letTerm,
                             appTerm
                             ] where
+                                letTerm = do s <- choose (0, pred n)
+                                             (liftM3 TmLet) arbitraryIdentifier (aTerm s) (aTerm $ n - s - 1)
                                 recTerm = do s <- choose (0, pred n)
                                              (liftM2 TmRec) (aTerm s) (aTerm $ n - s - 1)
                                 ifTerm = do a <- choose (0, pred n)
@@ -38,6 +41,7 @@ instance Arbitrary Term where
         shrink (TmAbs ident x) = [x] ++ [TmAbs ident x' | x' <- shrink x]
         shrink (TmApp x y) = [x, y] ++ [TmApp x' y' | (x', y') <- shrink (x, y)]
         shrink (TmIf x y z) = [x, y, z] ++ [TmIf x' y' z' | (x', y', z') <- shrink (x, y, z)]
+        shrink (TmLet s v b) = [v, b] ++ [TmLet s v' b' | (v', b') <- shrink (v, b)]
 
 arbitraryIdentifier :: Gen String
 arbitraryIdentifier = suchThat (listOf1 alpha) isNotReserved where

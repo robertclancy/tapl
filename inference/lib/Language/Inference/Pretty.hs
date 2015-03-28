@@ -23,14 +23,16 @@ prettyTerm (TmRec x y)   = text "rec" <+> prettyTermParens x <+> prettyTermParen
 prettyTerm (TmVar x) = text x
 prettyTerm (TmAbs x b) = text "\\" <> text x <> text "." <+> prettyTerm b
 prettyTerm (TmApp x y) = prettyTermParens x <+> prettyTermParens y
+prettyTerm (TmLet x val body) = text "let" <+> text x <+> text "=" <+> prettyTerm val <+> text "in" <+> prettyTerm body
 
 prettyTermParens :: Term -> Doc
-prettyTermParens x@(TmApp _ _)  = parens $ prettyTerm x
-prettyTermParens x@(TmAbs _ _)  = parens $ prettyTerm x
-prettyTermParens x@(TmIf _ _ _) = parens $ prettyTerm x
-prettyTermParens x@(TmSucc _)   = parens $ prettyTerm x
-prettyTermParens x@(TmRec _ _)  = parens $ prettyTerm x
-prettyTermParens x              = prettyTerm x
+prettyTermParens x@(TmApp _ _)   = parens $ prettyTerm x
+prettyTermParens x@(TmAbs _ _)   = parens $ prettyTerm x
+prettyTermParens x@(TmIf _ _ _)  = parens $ prettyTerm x
+prettyTermParens x@(TmSucc _)    = parens $ prettyTerm x
+prettyTermParens x@(TmRec _ _)   = parens $ prettyTerm x
+prettyTermParens x@(TmLet _ _ _) = parens $ prettyTerm x
+prettyTermParens x               = prettyTerm x
 
 prettyTermType :: Term -> TyMono -> Doc
 prettyTermType term ty = prettyTerm term <+> text ":" <+> prettyType ty

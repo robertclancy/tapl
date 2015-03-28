@@ -33,6 +33,9 @@ spec = do
                 infer (TmApp (TmAbs "x" (TmVar "x")) TmZero) `shouldBe` Right TyNat
             it "should correctly determine result of application of plus" $ do
                 infer (TmApp (TmRec (TmAbs "x" (TmVar "x")) (TmAbs "n" (TmAbs "f" (TmAbs "x" (TmSucc (TmApp (TmVar "f") (TmVar "x"))))))) (TmSucc TmZero)) `shouldBe` Right (TyArr TyNat TyNat)
+        describe "let" $ do
+            it "should be polymorphic" $ do
+                infer (TmLet "x" (TmAbs "x" (TmVar "x")) (TmIf (TmApp (TmVar "x") TmTrue) (TmApp (TmVar "x") TmZero) (TmApp (TmVar "x") (TmZero)))) `shouldBe` Right TyNat
         describe "invalid types" $ do
             it "should error if undefined variable" $ do
                 infer (TmVar "x") `shouldSatisfy` isLeft
