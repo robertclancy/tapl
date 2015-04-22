@@ -72,7 +72,7 @@ eval (TmAbs a b)                    = TmAbs a b
 eval (TmApp (TmAbs a b) s)          = eval $ shift (-1) $ substitute (shift 1 (eval s)) b
 eval (TmRec z f)                    = TmRec z f
 eval (TmApp (TmRec z f) TmZero)     = eval z
-eval (TmApp (TmRec z f) (TmSucc n)) = eval $ TmApp (TmApp f n) (TmApp (TmRec z f) n)
+eval (TmApp (TmRec z f) (TmSucc n)) = eval $ TmApp f (TmApp (TmRec z f) n)
 eval (TmApp f s)                    = eval $ TmApp (eval f) s
 
 substitute :: UTerm -> UTerm -> UTerm

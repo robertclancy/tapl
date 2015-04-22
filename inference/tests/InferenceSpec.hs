@@ -24,7 +24,7 @@ spec = do
             it "should infer one" $ do
                 infer (TmSucc TmZero) `shouldBe` Right TyNat
             it "should infer recursive function definitions" $ do
-                infer (TmRec TmTrue (TmAbs "x" (TmAbs "y" TmFalse))) `shouldBe` Right (TyArr TyNat TyBool)
+                infer (TmRec TmTrue (TmAbs "y" TmFalse)) `shouldBe` Right (TyArr TyNat TyBool)
             it "should infer the argument of an if statement" $ do
                 infer (TmAbs "x" (TmIf (TmVar "x") TmZero (TmSucc (TmZero)))) `shouldBe` Right (TyArr TyBool TyNat)
             it "should infer the result of an if statement" $ do
@@ -32,7 +32,7 @@ spec = do
             it "should correctly determine result of application" $ do
                 infer (TmApp (TmAbs "x" (TmVar "x")) TmZero) `shouldBe` Right TyNat
             it "should correctly determine result of application of plus" $ do
-                infer (TmApp (TmRec (TmAbs "x" (TmVar "x")) (TmAbs "n" (TmAbs "f" (TmAbs "x" (TmSucc (TmApp (TmVar "f") (TmVar "x"))))))) (TmSucc TmZero)) `shouldBe` Right (TyArr TyNat TyNat)
+                infer (TmApp (TmRec (TmAbs "x" (TmVar "x")) (TmAbs "f" (TmAbs "x" (TmSucc (TmApp (TmVar "f") (TmVar "x")))))) (TmSucc TmZero)) `shouldBe` Right (TyArr TyNat TyNat)
         describe "let" $ do
             it "should be polymorphic" $ do
                 infer (TmLet "x" (TmAbs "x" (TmVar "x")) (TmIf (TmApp (TmVar "x") TmTrue) (TmApp (TmVar "x") TmZero) (TmApp (TmVar "x") (TmZero)))) `shouldBe` Right TyNat
